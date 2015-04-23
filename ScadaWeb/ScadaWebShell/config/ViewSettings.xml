@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ViewSettings>
+  <Views>
+    <View type="EmptyView" title="Server Equipment" cnlNum="1">
+      <View type="TableView" fileName="Servers\ServerRoom.tbl" cnlNum="1">Server room</View>
+      <View type="SchemeView" fileName="Servers\ServerRoom.sch" cnlNum="1">Server room (scheme)</View>
+    </View>
+    <View type="TableView" fileName="Servers\OpcDemo.tbl" cnlNum="0">OPC Demo</View>
+  </Views>
+  <Reports>
+    <ReportGroup title="Energy Consumption">
+      <Report fileName="reports\RepHeat.aspx">Heat consumption report</Report>
+      <Report fileName="reports\RepElectro.aspx">Power consumption report</Report>
+    </ReportGroup>
+  </Reports>
+</ViewSettings>
