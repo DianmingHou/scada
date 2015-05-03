@@ -33,44 +33,8 @@ namespace Scada.Web
     /// The class contains utility methods for web applications
     /// <para>Класс, содержащий вспомогательные методы для веб-приложений</para>
     /// </summary>
-    static class ScadaWebUtils
+    public static class ScadaWebUtils
     {
-        /// <summary>
-        /// Делегат загрузки настроек
-        /// </summary>
-        public delegate bool LoadSettingsDelegate(string fileName, out string errMsg);
-
-
-        /// <summary>
-        /// Обновить настройки из файла, если файл изменился
-        /// </summary>
-        public static bool RefreshSettings(LoadSettingsDelegate loadSettingsMethod, string fileName,
-            ref DateTime fileAge, out bool reloaded, out string errMsg)
-        {
-            if (loadSettingsMethod == null)
-                throw new ArgumentNullException("loadSettingsMethod");
-
-            DateTime newFileAge = ScadaUtils.GetLastWriteTime(fileName);
-
-            if (fileAge == newFileAge)
-            {
-                reloaded = false;
-                errMsg = "";
-                return true;
-            }
-            else if (loadSettingsMethod(fileName, out errMsg))
-            {
-                reloaded = true;
-                fileAge = newFileAge;
-                return true;
-            }
-            else
-            {
-                reloaded = false;
-                return false;
-            }
-        }
-
         /// <summary>
         /// Отключить кэширование страницы
         /// </summary>

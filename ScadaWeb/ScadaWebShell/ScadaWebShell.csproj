@@ -74,7 +74,9 @@
     <Content Include="css\bootstrap-theme.css.map" />
     <Content Include="css\bootstrap.css.map" />
     <Content Include="js\jquery-2.1.3.min.map" />
+    <None Include="Properties\PublishProfiles\Main.pubxml" />
     <None Include="Properties\PublishProfiles\MainProfile.pubxml" />
+    <Content Include="lang\ScadaWeb.en-GB.xml" />
     <Content Include="Login.aspx" />
     <Content Include="Logout.aspx" />
     <Content Include="ScadaMain.Master" />
@@ -136,7 +138,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="images\" />
-    <Folder Include="lang\" />
     <Folder Include="log\" />
     <Folder Include="plugins\" />
     <Folder Include="reports\" />

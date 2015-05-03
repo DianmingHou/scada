@@ -35,7 +35,7 @@ namespace Scada.Web
     /// View settings
     /// <para>Настройки представлений</para>
     /// </summary>
-    public class ViewSettings
+    public class ViewSettings : BaseSettings
     {
         /// <summary>
         /// Стандартные типы представлений
@@ -209,11 +209,24 @@ namespace Scada.Web
         /// Конструктор
         /// </summary>
         public ViewSettings()
+            : base()
         {
             ViewItems = new List<ViewItem>();
             AllViewItems = new List<ViewItem>();
             ReportGroups = new List<ReportGroup>();
             AllReports = new List<ReportItem>();
+        }
+
+
+        /// <summary>
+        /// Получить имя файла по умолчанию
+        /// </summary>
+        public override string DefaultFileName
+        {
+            get
+            {
+                return DefFileName;
+            }
         }
 
 
@@ -302,7 +315,7 @@ namespace Scada.Web
         /// <summary>
         /// Загрузить настройки представлений из файла
         /// </summary>
-        public bool LoadFromFile(string fileName, out string errMsg)
+        public override bool LoadFromFile(string fileName, out string msg)
         {
             // установка значений по умолчанию
             SetToDefault();
@@ -344,12 +357,12 @@ namespace Scada.Web
                     }
                 }
 
-                errMsg = "";
+                msg = WebPhrases.ViewSettingsLoaded;
                 return true;
             }
             catch (Exception ex)
             {
-                errMsg = WebPhrases.LoadViewSettingsError + ": " + ex.Message;
+                msg = WebPhrases.LoadViewSettingsError + ": " + ex.Message;
                 return false;
             }
         }
@@ -357,7 +370,7 @@ namespace Scada.Web
         /// <summary>
         /// Сохранить настройки представлений в файле
         /// </summary>
-        public bool SaveToFile(string fileName, out string errMsg)
+        public override bool SaveToFile(string fileName, out string errMsg)
         {
             try
             {

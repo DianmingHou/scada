@@ -1,4 +1,4 @@
-/*
+п»ї/*
  * Copyright 2015 Mikhail Shiryaev
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,28 +36,26 @@ namespace Scada.Web
 {
 	/// <summary>
     /// Common data of the application
-    /// <para>Общие данные приложения</para>
+    /// <para>РћР±С‰РёРµ РґР°РЅРЅС‹Рµ РїСЂРёР»РѕР¶РµРЅРёСЏ</para>
 	/// </summary>
 	public static class AppData
 	{
         /// <summary>
-        /// Имя файла журнала приложения без директории
+        /// РРјСЏ С„Р°Р№Р»Р° Р¶СѓСЂРЅР°Р»Р° РїСЂРёР»РѕР¶РµРЅРёСЏ Р±РµР· РґРёСЂРµРєС‚РѕСЂРёРё
         /// </summary>
         public const string LogFileName = "ScadaWeb.log";
 
-        private static readonly object appDataLock;  // объект для синхронизации доступа к данным приложения
-        private static WebSettings webSettings;      // настройки веб-приложения
-        private static ViewSettings viewSettings;    // настройки представлений
-        private static List<PluginInfo> plugins;     // подключенные плагины
+        private static readonly object appDataLock;  // РѕР±СЉРµРєС‚ РґР»СЏ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё РґРѕСЃС‚СѓРїР° Рє РґР°РЅРЅС‹Рј РїСЂРёР»РѕР¶РµРЅРёСЏ
+        private static WebSettings webSettings;      // РЅР°СЃС‚СЂРѕР№РєРё РІРµР±-РїСЂРёР»РѕР¶РµРЅРёСЏ
+        private static ViewSettings viewSettings;    // РЅР°СЃС‚СЂРѕР№РєРё РїСЂРµРґСЃС‚Р°РІР»РµРЅРёР№
+        private static List<PluginInfo> plugins;     // РїРѕРґРєР»СЋС‡РµРЅРЅС‹Рµ РїР»Р°РіРёРЅС‹
 
-        private static DateTime scadaDataDictAge;    // время изменения файла словаря ScadaData
-        private static DateTime scadaWebDictAge;     // время изменения файла словаря ScadaWeb
-        private static DateTime webSettingsFileAge;  // время изменения файла настроек веб-приложения
-        private static DateTime viewSettingsFileAge; // время изменения файла настроек представлений
+        private static DateTime scadaDataDictAge;    // РІСЂРµРјСЏ РёР·РјРµРЅРµРЅРёСЏ С„Р°Р№Р»Р° СЃР»РѕРІР°СЂСЏ ScadaData
+        private static DateTime scadaWebDictAge;     // РІСЂРµРјСЏ РёР·РјРµРЅРµРЅРёСЏ С„Р°Р№Р»Р° СЃР»РѕРІР°СЂСЏ ScadaWeb
         
 
         /// <summary>
-        /// Конструктор
+        /// РЎС‚Р°С‚РёС‡РµСЃРєРёР№ РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ
         /// </summary>
         static AppData()
 		{
@@ -68,8 +66,6 @@ namespace Scada.Web
 
             scadaDataDictAge = DateTime.MinValue;
             scadaWebDictAge = DateTime.MinValue;
-            webSettingsFileAge = DateTime.MinValue;
-            viewSettingsFileAge = DateTime.MinValue;
 
             Inited = false;
             AppDirs = new AppDirectories();
@@ -79,87 +75,79 @@ namespace Scada.Web
 
 
         /// <summary>
-        /// Получить признак инициализации общих данных приложения
+        /// РџРѕР»СѓС‡РёС‚СЊ РїСЂРёР·РЅР°Рє РёРЅРёС†РёР°Р»РёР·Р°С†РёРё РѕР±С‰РёС… РґР°РЅРЅС‹С… РїСЂРёР»РѕР¶РµРЅРёСЏ
         /// </summary>
         public static bool Inited { get; private set; }
 
         /// <summary>
-        /// Получить директории приложения
+        /// РџРѕР»СѓС‡РёС‚СЊ РґРёСЂРµРєС‚РѕСЂРёРё РїСЂРёР»РѕР¶РµРЅРёСЏ
         /// </summary>
         public static AppDirectories AppDirs { get; private set; }
         
         /// <summary>
-        /// Получить журнал приложения
+        /// РџРѕР»СѓС‡РёС‚СЊ Р¶СѓСЂРЅР°Р» РїСЂРёР»РѕР¶РµРЅРёСЏ
         /// </summary>
         public static Log Log { get; private set; }
 
         /// <summary>
-        /// Получить объект для работы с данными системы
+        /// РџРѕР»СѓС‡РёС‚СЊ РѕР±СЉРµРєС‚ РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ РґР°РЅРЅС‹РјРё СЃРёСЃС‚РµРјС‹
         /// </summary>
         public static MainData MainData { get; private set; }
 
 
         /// <summary>
-        /// Обновить словари веб-приложения
+        /// РћР±РЅРѕРІРёС‚СЊ СЃР»РѕРІР°СЂРё РІРµР±-РїСЂРёР»РѕР¶РµРЅРёСЏ
         /// </summary>
         private static void RefreshDictionaries()
         {
             if (!Localization.UseRussian)
             {
-                // обновление словаря ScadaData
+                // РѕР±РЅРѕРІР»РµРЅРёРµ СЃР»РѕРІР°СЂСЏ ScadaData
                 bool updated;
-                string errMsg;
-                Localization.RefreshDictionary(AppDirs.LangDir, "ScadaData", ref scadaDataDictAge, 
-                    out updated, out errMsg);
+                string msg;
+                bool refreshOK = Localization.RefreshDictionary(AppDirs.LangDir, "ScadaData", ref scadaDataDictAge, 
+                    out updated, out msg);
+                Log.WriteAction(msg, refreshOK ? Log.ActTypes.Action : Log.ActTypes.Error);
 
                 if (updated)
                     CommonPhrases.Init();
-                else if (errMsg != "")
-                    Log.WriteAction(errMsg, Log.ActTypes.Error);
 
-                // обновление словаря ScadaWeb
-                Localization.RefreshDictionary(AppDirs.LangDir, "ScadaWeb", ref scadaWebDictAge, 
-                    out updated, out errMsg);
+                // РѕР±РЅРѕРІР»РµРЅРёРµ СЃР»РѕРІР°СЂСЏ ScadaWeb
+                refreshOK = Localization.RefreshDictionary(AppDirs.LangDir, "ScadaWeb", ref scadaWebDictAge, 
+                    out updated, out msg);
+                Log.WriteAction(msg, refreshOK ? Log.ActTypes.Action : Log.ActTypes.Error);
                 
                 if (updated)
                     WebPhrases.Init();
-                else if (errMsg != "")
-                    Log.WriteAction(errMsg, Log.ActTypes.Error);
             }
         }
 
         /// <summary>
-        /// Обновить настройки веб-приложения
+        /// РћР±РЅРѕРІРёС‚СЊ РЅР°СЃС‚СЂРѕР№РєРё РІРµР±-РїСЂРёР»РѕР¶РµРЅРёСЏ
         /// </summary>
         private static bool RefreshWebSettings()
         {
             bool reloaded;
-            string errMsg;
-            if (!ScadaWebUtils.RefreshSettings(webSettings.LoadFromFile, AppDirs.ConfigDir + WebSettings.DefFileName,
-                ref webSettingsFileAge, out reloaded, out errMsg))
-            {
-                Log.WriteAction(errMsg, Log.ActTypes.Error);
-            }
+            string msg;
+            bool refreshOK = webSettings.Refresh(AppDirs.ConfigDir, out reloaded, out msg);
+            Log.WriteAction(msg, refreshOK ? Log.ActTypes.Action : Log.ActTypes.Error);
             return reloaded;
         }
 
         /// <summary>
-        /// Обновить настройки представлений
+        /// РћР±РЅРѕРІРёС‚СЊ РЅР°СЃС‚СЂРѕР№РєРё РїСЂРµРґСЃС‚Р°РІР»РµРЅРёР№
         /// </summary>
         private static bool RefreshViewSettings()
         {
             bool reloaded;
-            string errMsg;
-            if (!ScadaWebUtils.RefreshSettings(viewSettings.LoadFromFile, AppDirs.ConfigDir + ViewSettings.DefFileName,
-                ref viewSettingsFileAge, out reloaded, out errMsg))
-            {
-                Log.WriteAction(errMsg, Log.ActTypes.Error);
-            }
+            string msg;
+            bool refreshOK = viewSettings.Refresh(AppDirs.ConfigDir, out reloaded, out msg);
+            Log.WriteAction(msg, refreshOK ? Log.ActTypes.Action : Log.ActTypes.Error);
             return reloaded;
         }
 
         /// <summary>
-        /// Загрузить информацию о плагинах
+        /// Р—Р°РіСЂСѓР·РёС‚СЊ РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ РїР»Р°РіРёРЅР°С…
         /// </summary>
         private static void LoadPlugins()
         {
@@ -178,7 +166,7 @@ namespace Scada.Web
         }
 
         /// <summary>
-        /// Инициализировать плагины
+        /// РРЅРёС†РёР°Р»РёР·РёСЂРѕРІР°С‚СЊ РїР»Р°РіРёРЅС‹
         /// </summary>
         private static void InitPlugins()
         {
@@ -191,7 +179,7 @@ namespace Scada.Web
                 catch (Exception ex)
                 {
                     Log.WriteAction(string.Format(Localization.UseRussian ?
-                        "Ошибка при инициализации плагина \"{0}\": {1}" :
+                        "РћС€РёР±РєР° РїСЂРё РёРЅРёС†РёР°Р»РёР·Р°С†РёРё РїР»Р°РіРёРЅР° \"{0}\": {1}" :
                         "Error initializing plugin \"{0}\": {1}", pluginInfo.Name, ex.Message),
                         Log.ActTypes.Exception);
                 }
@@ -199,7 +187,7 @@ namespace Scada.Web
         }
 
         /// <summary>
-        /// Обновить настройки плагинов
+        /// РћР±РЅРѕРІРёС‚СЊ РЅР°СЃС‚СЂРѕР№РєРё РїР»Р°РіРёРЅРѕРІ
         /// </summary>
         private static void RefreshPluginSettings()
         {
@@ -212,7 +200,7 @@ namespace Scada.Web
                 catch (Exception ex)
                 {
                     Log.WriteAction(string.Format(Localization.UseRussian ? 
-                        "Ошибка при обновлении настроек плагина \"{0}\": {1}" :
+                        "РћС€РёР±РєР° РїСЂРё РѕР±РЅРѕРІР»РµРЅРёРё РЅР°СЃС‚СЂРѕРµРє РїР»Р°РіРёРЅР° \"{0}\": {1}" :
                         "Error refreshing plugin \"{0}\" settings: {1}", pluginInfo.Name, ex.Message), 
                         Log.ActTypes.Exception);
                 }
@@ -221,7 +209,7 @@ namespace Scada.Web
 
 
         /// <summary>
-        /// Инициализировать общие данные приложения
+        /// РРЅРёС†РёР°Р»РёР·РёСЂРѕРІР°С‚СЊ РѕР±С‰РёРµ РґР°РЅРЅС‹Рµ РїСЂРёР»РѕР¶РµРЅРёСЏ
         /// </summary>
         public static void InitAppData()
         {
@@ -231,42 +219,42 @@ namespace Scada.Web
                 {
                     Inited = true;
 
-                    // инициализация директорий приложения
+                    // РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РґРёСЂРµРєС‚РѕСЂРёР№ РїСЂРёР»РѕР¶РµРЅРёСЏ
                     if (HttpContext.Current != null && HttpContext.Current.Request != null)
                         AppDirs.Init(HttpContext.Current.Request.PhysicalApplicationPath);
 
-                    // настройка журнала приложения
+                    // РЅР°СЃС‚СЂРѕР№РєР° Р¶СѓСЂРЅР°Р»Р° РїСЂРёР»РѕР¶РµРЅРёСЏ
                     Log.FileName = AppDirs.LogDir + LogFileName;
                     Log.Encoding = Encoding.UTF8;
                     Log.WriteBreak();
-                    Log.WriteAction(Localization.UseRussian ? "Инициализация общих данных приложения" :
+                    Log.WriteAction(Localization.UseRussian ? "РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РѕР±С‰РёС… РґР°РЅРЅС‹С… РїСЂРёР»РѕР¶РµРЅРёСЏ" :
                         "Initialize common application data", Log.ActTypes.Action);
 
-                    // настройка объекта для работы с данными системы
+                    // РЅР°СЃС‚СЂРѕР№РєР° РѕР±СЉРµРєС‚Р° РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ РґР°РЅРЅС‹РјРё СЃРёСЃС‚РµРјС‹
                     MainData.SettingsFileName = AppDirs.ConfigDir + CommSettings.DefFileName;
                 }
 
-                // обновление словарей веб-приложения
+                // РѕР±РЅРѕРІР»РµРЅРёРµ СЃР»РѕРІР°СЂРµР№ РІРµР±-РїСЂРёР»РѕР¶РµРЅРёСЏ
                 RefreshDictionaries();
 
-                // обновление настроек веб-приложения
+                // РѕР±РЅРѕРІР»РµРЅРёРµ РЅР°СЃС‚СЂРѕРµРє РІРµР±-РїСЂРёР»РѕР¶РµРЅРёСЏ
                 if (RefreshWebSettings())
                 {
-                    // загрузка информации о плагинах и инициализация плагинов
+                    // Р·Р°РіСЂСѓР·РєР° РёРЅС„РѕСЂРјР°С†РёРё Рѕ РїР»Р°РіРёРЅР°С… Рё РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РїР»Р°РіРёРЅРѕРІ
                     LoadPlugins();
                     InitPlugins();
                 }
 
-                // обновление настроек плагинов
+                // РѕР±РЅРѕРІР»РµРЅРёРµ РЅР°СЃС‚СЂРѕРµРє РїР»Р°РіРёРЅРѕРІ
                 RefreshPluginSettings();
 
-                // обновление настроек представлений
+                // РѕР±РЅРѕРІР»РµРЅРёРµ РЅР°СЃС‚СЂРѕРµРє РїСЂРµРґСЃС‚Р°РІР»РµРЅРёР№
                 RefreshViewSettings();
             }
         }
 
         /// <summary>
-        /// Получить копию настроек веб-приложения
+        /// РџРѕР»СѓС‡РёС‚СЊ РєРѕРїРёСЋ РЅР°СЃС‚СЂРѕРµРє РІРµР±-РїСЂРёР»РѕР¶РµРЅРёСЏ
         /// </summary>
         public static WebSettings GetWebSettingsCopy()
         {
@@ -275,7 +263,7 @@ namespace Scada.Web
         }
 
         /// <summary>
-        /// Получить копию настроек представлений
+        /// РџРѕР»СѓС‡РёС‚СЊ РєРѕРїРёСЋ РЅР°СЃС‚СЂРѕРµРє РїСЂРµРґСЃС‚Р°РІР»РµРЅРёР№
         /// </summary>
         public static ViewSettings GetViewSettingsCopy()
         {
@@ -284,7 +272,7 @@ namespace Scada.Web
         }
 
         /// <summary>
-        /// Сформировать меню пользователя, используя подключенные плагины
+        /// РЎС„РѕСЂРјРёСЂРѕРІР°С‚СЊ РјРµРЅСЋ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ, РёСЃРїРѕР»СЊР·СѓСЏ РїРѕРґРєР»СЋС‡РµРЅРЅС‹Рµ РїР»Р°РіРёРЅС‹
         /// </summary>
         public static void MakeUserMenu(UserData userData)
         {
@@ -295,7 +283,7 @@ namespace Scada.Web
                     HashSet<PluginInfo.StandardMenuItem> standardMenuItems = 
                         new HashSet<PluginInfo.StandardMenuItem>();
 
-                    // добавление пользовательских элементов меню
+                    // РґРѕР±Р°РІР»РµРЅРёРµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРёС… СЌР»РµРјРµРЅС‚РѕРІ РјРµРЅСЋ
                     foreach (PluginInfo pluginInfo in plugins)
                     {
                         try
@@ -306,13 +294,13 @@ namespace Scada.Web
                         catch (Exception ex)
                         {
                             Log.WriteAction(string.Format(Localization.UseRussian ?
-                                "Ошибка при получении элементов меню плагина \"{0}\": {1}" :
+                                "РћС€РёР±РєР° РїСЂРё РїРѕР»СѓС‡РµРЅРёРё СЌР»РµРјРµРЅС‚РѕРІ РјРµРЅСЋ РїР»Р°РіРёРЅР° \"{0}\": {1}" :
                                 "Error getting menu items of plugin \"{0}\": {1}", pluginInfo.Name, ex.Message),
                                 Log.ActTypes.Exception);
                         }
                     }
 
-                    // добавление стандартных элементов меню
+                    // РґРѕР±Р°РІР»РµРЅРёРµ СЃС‚Р°РЅРґР°СЂС‚РЅС‹С… СЌР»РµРјРµРЅС‚РѕРІ РјРµРЅСЋ
                     if (standardMenuItems.Contains(PluginInfo.StandardMenuItem.Config))
                         userData.UserMenu.Insert(0, PluginInfo.ConvertStandardMenuItem(
                             PluginInfo.StandardMenuItem.Config));
@@ -333,11 +321,11 @@ namespace Scada.Web
         }
 
         /// <summary>
-        /// Получить информацию о плагине по его типу
+        /// РџРѕР»СѓС‡РёС‚СЊ РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ РїР»Р°РіРёРЅРµ РїРѕ РµРіРѕ С‚РёРїСѓ
         /// </summary>
         public static PluginInfo GetPluginInfo(Type pluginInfoType)
         {
-            // безопасно ли?
+            // Р±РµР·РѕРїР°СЃРЅРѕ Р»Рё?
             lock (appDataLock)
             {
                 return null;

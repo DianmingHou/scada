@@ -4,7 +4,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
-    <title>Выход из системы</title>
+    <title>Rapid SCADA - Выход</title>
 </head>
 <body>
 </body>

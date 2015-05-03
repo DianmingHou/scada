@@ -1,4 +1,4 @@
-/*
+п»ї/*
  * Copyright 2015 Mikhail Shiryaev
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,75 +32,88 @@ namespace Scada.Web
 {
 	/// <summary>
     /// Web application settings
-    /// <para>Настройки веб-приложения</para>
+    /// <para>РќР°СЃС‚СЂРѕР№РєРё РІРµР±-РїСЂРёР»РѕР¶РµРЅРёСЏ</para>
 	/// </summary>
-	public class WebSettings
+	public class WebSettings : BaseSettings
 	{
         /// <summary>
-        /// Имя файла настроек веб-приложения по умолчанию
+        /// РРјСЏ С„Р°Р№Р»Р° РЅР°СЃС‚СЂРѕРµРє РІРµР±-РїСЂРёР»РѕР¶РµРЅРёСЏ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
 		/// </summary>
 		public const string DefFileName = "WebSettings.xml";
 
 
         /// <summary>
-        /// Конструктор
+        /// РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ
         /// </summary>
         public WebSettings()
+            : base()
 		{
             PluginFileNames = new List<string>();
             SetToDefault();
         }
 
 
+        /// <summary>
+        /// РџРѕР»СѓС‡РёС‚СЊ РёРјСЏ С„Р°Р№Р»Р° РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
+        /// </summary>
+        public override string DefaultFileName
+        {
+            get
+            {
+                return DefFileName;
+            }
+        }
+
+
 		/// <summary>
-		/// Получить или установить частоту обновления срезов, с
+		/// РџРѕР»СѓС‡РёС‚СЊ РёР»Рё СѓСЃС‚Р°РЅРѕРІРёС‚СЊ С‡Р°СЃС‚РѕС‚Сѓ РѕР±РЅРѕРІР»РµРЅРёСЏ СЃСЂРµР·РѕРІ, СЃ
 		/// </summary>
         public int SrezRefrFreq { get; set; }
 
         /// <summary>
-        /// Получить или установить частоту обновления событий
+        /// РџРѕР»СѓС‡РёС‚СЊ РёР»Рё СѓСЃС‚Р°РЅРѕРІРёС‚СЊ С‡Р°СЃС‚РѕС‚Сѓ РѕР±РЅРѕРІР»РµРЅРёСЏ СЃРѕР±С‹С‚РёР№
         /// </summary>
         public int EventRefrFreq { get; set; }
 
         /// <summary>
-        /// Получить или установить количество отображаемых событий
+        /// РџРѕР»СѓС‡РёС‚СЊ РёР»Рё СѓСЃС‚Р°РЅРѕРІРёС‚СЊ РєРѕР»РёС‡РµСЃС‚РІРѕ РѕС‚РѕР±СЂР°Р¶Р°РµРјС‹С… СЃРѕР±С‹С‚РёР№
         /// </summary>
         public int EventCnt { get; set; }
 
         /// <summary>
-        /// Получить или установить признак включения фильтра событий по представлению по умолчанию
+        /// РџРѕР»СѓС‡РёС‚СЊ РёР»Рё СѓСЃС‚Р°РЅРѕРІРёС‚СЊ РїСЂРёР·РЅР°Рє РІРєР»СЋС‡РµРЅРёСЏ С„РёР»СЊС‚СЂР° СЃРѕР±С‹С‚РёР№ РїРѕ РїСЂРµРґСЃС‚Р°РІР»РµРЅРёСЋ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
         /// </summary>
         public bool EventFltr { get; set; }
 
         /// <summary>
-        /// Получить или установить расстояние между точками графика, при котором делать разрыв, с
+        /// РџРѕР»СѓС‡РёС‚СЊ РёР»Рё СѓСЃС‚Р°РЅРѕРІРёС‚СЊ СЂР°СЃСЃС‚РѕСЏРЅРёРµ РјРµР¶РґСѓ С‚РѕС‡РєР°РјРё РіСЂР°С„РёРєР°, РїСЂРё РєРѕС‚РѕСЂРѕРј РґРµР»Р°С‚СЊ СЂР°Р·СЂС‹РІ, СЃ
         /// </summary>
         public int DiagBreak { get; set; }
 
         /// <summary>
-        /// Получить или установить разрешение команд управления
+        /// РџРѕР»СѓС‡РёС‚СЊ РёР»Рё СѓСЃС‚Р°РЅРѕРІРёС‚СЊ СЂР°Р·СЂРµС€РµРЅРёРµ РєРѕРјР°РЅРґ СѓРїСЂР°РІР»РµРЅРёСЏ
         /// </summary>
         public bool CmdEnabled { get; set; }
 
         /// <summary>
-        /// Получить или установить признак простой отправки команд управления
+        /// РџРѕР»СѓС‡РёС‚СЊ РёР»Рё СѓСЃС‚Р°РЅРѕРІРёС‚СЊ РїСЂРёР·РЅР°Рє РїСЂРѕСЃС‚РѕР№ РѕС‚РїСЂР°РІРєРё РєРѕРјР°РЅРґ СѓРїСЂР°РІР»РµРЅРёСЏ
         /// </summary>
         public bool SimpleCmd { get; set; }
 
         /// <summary>
-        /// Получить или установить разрешение запоминать пользователя, вошедшего в систему
+        /// РџРѕР»СѓС‡РёС‚СЊ РёР»Рё СѓСЃС‚Р°РЅРѕРІРёС‚СЊ СЂР°Р·СЂРµС€РµРЅРёРµ Р·Р°РїРѕРјРёРЅР°С‚СЊ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ, РІРѕС€РµРґС€РµРіРѕ РІ СЃРёСЃС‚РµРјСѓ
         /// </summary>
         public bool RemEnabled { get; set; }
 
 
         /// <summary>
-        /// Получить список имён файлов библиотек плагинов
+        /// РџРѕР»СѓС‡РёС‚СЊ СЃРїРёСЃРѕРє РёРјС‘РЅ С„Р°Р№Р»РѕРІ Р±РёР±Р»РёРѕС‚РµРє РїР»Р°РіРёРЅРѕРІ
         /// </summary>
         public List<string> PluginFileNames { get; protected set; }
 
 
         /// <summary>
-        /// Установить значения настроек по умолчанию
+        /// РЈСЃС‚Р°РЅРѕРІРёС‚СЊ Р·РЅР°С‡РµРЅРёСЏ РЅР°СЃС‚СЂРѕРµРє РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
         /// </summary>
         protected void SetToDefault()
         {
@@ -118,25 +131,25 @@ namespace Scada.Web
 
 
         /// <summary>
-        /// Загрузить настройки веб-приложения из файла, если файл изменился
+        /// Р—Р°РіСЂСѓР·РёС‚СЊ РЅР°СЃС‚СЂРѕР№РєРё РІРµР±-РїСЂРёР»РѕР¶РµРЅРёСЏ РёР· С„Р°Р№Р»Р°, РµСЃР»Рё С„Р°Р№Р» РёР·РјРµРЅРёР»СЃСЏ
 		/// </summary>
-		public bool LoadFromFile(string fileName, out string errMsg)
+        public override bool LoadFromFile(string fileName, out string msg)
 		{
-            // установка значений по умолчанию
+            // СѓСЃС‚Р°РЅРѕРІРєР° Р·РЅР°С‡РµРЅРёР№ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
             SetToDefault();
 
             try
             {
-                // вызов исключения, если файл не существует
+                // РІС‹Р·РѕРІ РёСЃРєР»СЋС‡РµРЅРёСЏ, РµСЃР»Рё С„Р°Р№Р» РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚
                 if (!File.Exists(fileName))
                     throw new FileNotFoundException(string.Format(CommonPhrases.NamedFileNotFound, fileName));
 
-                // загрузка настроек
+                // Р·Р°РіСЂСѓР·РєР° РЅР°СЃС‚СЂРѕРµРє
                 XmlDocument xmlDoc = new XmlDocument();
                 xmlDoc.Load(fileName);
                 XmlElement rootElem = xmlDoc.DocumentElement;
 
-                // загрузка параметров веб-приложения
+                // Р·Р°РіСЂСѓР·РєР° РїР°СЂР°РјРµС‚СЂРѕРІ РІРµР±-РїСЂРёР»РѕР¶РµРЅРёСЏ
                 XmlNode appParamsNode = rootElem.SelectSingleNode("AppParams");
                 if (appParamsNode != null)
                 {
@@ -173,7 +186,7 @@ namespace Scada.Web
                     }
                 }
 
-                // загрузка имён файлов библиотек плагинов
+                // Р·Р°РіСЂСѓР·РєР° РёРјС‘РЅ С„Р°Р№Р»РѕРІ Р±РёР±Р»РёРѕС‚РµРє РїР»Р°РіРёРЅРѕРІ
                 XmlNode pluginsNode = rootElem.SelectSingleNode("Plugins");
                 if (pluginsNode != null)
                 {
@@ -182,20 +195,20 @@ namespace Scada.Web
                         PluginFileNames.Add(pluginElem.GetAttribute("fileName"));
                 }
 
-                errMsg = "";
+                msg = WebPhrases.WebSettingsLoaded;
                 return true;
             }
             catch (Exception ex)
             {
-                errMsg = WebPhrases.LoadWebSettingsError + ": " + ex.Message;
+                msg = WebPhrases.LoadWebSettingsError + ": " + ex.Message;
                 return false;
             }
         }
 
         /// <summary>
-        /// Сохранить настройки веб-приложения в файле
+        /// РЎРѕС…СЂР°РЅРёС‚СЊ РЅР°СЃС‚СЂРѕР№РєРё РІРµР±-РїСЂРёР»РѕР¶РµРЅРёСЏ РІ С„Р°Р№Р»Рµ
         /// </summary>
-        public bool SaveToFile(string fileName, out string errMsg)
+        public override bool SaveToFile(string fileName, out string errMsg)
         {
             try
             {
@@ -207,29 +220,29 @@ namespace Scada.Web
                 XmlElement rootElem = xmlDoc.CreateElement("WebSettings");
                 xmlDoc.AppendChild(rootElem);
 
-                // сохранение параметров веб-приложения
+                // СЃРѕС…СЂР°РЅРµРЅРёРµ РїР°СЂР°РјРµС‚СЂРѕРІ РІРµР±-РїСЂРёР»РѕР¶РµРЅРёСЏ
                 XmlElement appParamsElem = xmlDoc.CreateElement("AppParams");
                 rootElem.AppendChild(appParamsElem);
 
                 appParamsElem.AppendParamElem("SrezRefrFreq", SrezRefrFreq, 
-                    "Частота обновления срезов, с", "Values refresh frequency, sec");
+                    "Р§Р°СЃС‚РѕС‚Р° РѕР±РЅРѕРІР»РµРЅРёСЏ СЃСЂРµР·РѕРІ, СЃ", "Values refresh frequency, sec");
                 appParamsElem.AppendParamElem("EventRefrFreq", EventRefrFreq,
-                    "Частота обновления событий, с", "Events refresh frequency, sec");
+                    "Р§Р°СЃС‚РѕС‚Р° РѕР±РЅРѕРІР»РµРЅРёСЏ СЃРѕР±С‹С‚РёР№, СЃ", "Events refresh frequency, sec");
                 appParamsElem.AppendParamElem("EventCnt", EventCnt, 
-                    "Количество отображаемых событий", "Display events count");
+                    "РљРѕР»РёС‡РµСЃС‚РІРѕ РѕС‚РѕР±СЂР°Р¶Р°РµРјС‹С… СЃРѕР±С‹С‚РёР№", "Display events count");
                 appParamsElem.AppendParamElem("EventFltr", EventFltr,
-                    "Установка фильтра событий по представлению по умолчанию", "Set 'View' event filter by default");
+                    "РЈСЃС‚Р°РЅРѕРІРєР° С„РёР»СЊС‚СЂР° СЃРѕР±С‹С‚РёР№ РїРѕ РїСЂРµРґСЃС‚Р°РІР»РµРЅРёСЋ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ", "Set 'View' event filter by default");
                 appParamsElem.AppendParamElem("DiagBreak", DiagBreak,
-                    "Расстояние между точками графика, при котором делать разрыв, с", 
+                    "Р Р°СЃСЃС‚РѕСЏРЅРёРµ РјРµР¶РґСѓ С‚РѕС‡РєР°РјРё РіСЂР°С„РёРєР°, РїСЂРё РєРѕС‚РѕСЂРѕРј РґРµР»Р°С‚СЊ СЂР°Р·СЂС‹РІ, СЃ", 
                     "Distance between points on the diagramm to make a break, sec");
                 appParamsElem.AppendParamElem("CmdEnabled", CmdEnabled,
-                    "Разрешение команд управления", "Enable commands");
+                    "Р Р°Р·СЂРµС€РµРЅРёРµ РєРѕРјР°РЅРґ СѓРїСЂР°РІР»РµРЅРёСЏ", "Enable commands");
                 appParamsElem.AppendParamElem("SimpleCmd", SimpleCmd,
-                    "Простая отправка команд управления", "Simple commands sending");
+                    "РџСЂРѕСЃС‚Р°СЏ РѕС‚РїСЂР°РІРєР° РєРѕРјР°РЅРґ СѓРїСЂР°РІР»РµРЅРёСЏ", "Simple commands sending");
                 appParamsElem.AppendParamElem("RemEnabled", RemEnabled,
-                    "Разрешение запоминать пользователя, вошедшего в систему", "Enable to remember logged on user");
+                    "Р Р°Р·СЂРµС€РµРЅРёРµ Р·Р°РїРѕРјРёРЅР°С‚СЊ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ, РІРѕС€РµРґС€РµРіРѕ РІ СЃРёСЃС‚РµРјСѓ", "Enable to remember logged on user");
 
-                // сохранение имён файлов библиотек плагинов
+                // СЃРѕС…СЂР°РЅРµРЅРёРµ РёРјС‘РЅ С„Р°Р№Р»РѕРІ Р±РёР±Р»РёРѕС‚РµРє РїР»Р°РіРёРЅРѕРІ
                 XmlElement pluginsElem = xmlDoc.CreateElement("Plugins");
                 rootElem.AppendChild(pluginsElem);
 
@@ -252,7 +265,7 @@ namespace Scada.Web
         }
 
         /// <summary>
-        /// Создать копию настроек веб-приложения
+        /// РЎРѕР·РґР°С‚СЊ РєРѕРїРёСЋ РЅР°СЃС‚СЂРѕРµРє РІРµР±-РїСЂРёР»РѕР¶РµРЅРёСЏ
         /// </summary>
         public WebSettings Clone()
         {

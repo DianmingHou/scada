@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="AppData.cs" />
     <Compile Include="AppDirectories.cs" />
+    <Compile Include="BaseSettings.cs" />
     <Compile Include="MainData.cs" />
     <Compile Include="PluginInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

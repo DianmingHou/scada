@@ -70,10 +70,12 @@ namespace Scada.Web
         public static string SaveTableViewError { get; private set; }
 
         // Словарь Scada.Web.ViewSettings
+        public static string ViewSettingsLoaded { get; private set; }
         public static string LoadViewSettingsError { get; private set; }
         public static string SaveViewSettingsError { get; private set; }
 
         // Словарь Scada.Web.WebSettings
+        public static string WebSettingsLoaded { get; private set; }
         public static string LoadWebSettingsError { get; private set; }
         public static string SaveWebSettingsError { get; private set; }
         
@@ -160,9 +162,11 @@ namespace Scada.Web
             LoadTableViewError = "Ошибка при загрузке табличного представления из файла";
             SaveTableViewError = "Ошибка при сохранении табличного представления в файле";
 
+            ViewSettingsLoaded = "Загружены настройки представлений";
             LoadViewSettingsError = "Ошибка при загрузке настроек представлений из файла";
             SaveViewSettingsError = "Ошибка при сохранении настроек представлений в файле";
 
+            WebSettingsLoaded = "Загружены настройки веб-приложения";
             LoadWebSettingsError = "Ошибка при загрузке настроек веб-приложения из файла";
             SaveWebSettingsError = "Ошибка при сохранении настроек веб-приложения в файле";
 
@@ -260,12 +264,14 @@ namespace Scada.Web
 
             if (Localization.Dictionaries.TryGetValue("Scada.Web.ViewSettings", out dict))
             {
+                ViewSettingsLoaded = dict.GetPhrase("ViewSettingsLoaded", ViewSettingsLoaded);
                 LoadViewSettingsError = dict.GetPhrase("LoadViewSettingsError", LoadViewSettingsError);
                 SaveViewSettingsError = dict.GetPhrase("SaveViewSettingsError", SaveViewSettingsError);
             }
 
             if (Localization.Dictionaries.TryGetValue("Scada.Web.WebSettings", out dict))
             {
+                WebSettingsLoaded = dict.GetPhrase("WebSettingsLoaded", WebSettingsLoaded);
                 LoadWebSettingsError = dict.GetPhrase("LoadWebSettingsError", LoadWebSettingsError);
                 SaveWebSettingsError = dict.GetPhrase("SaveWebSettingsError", SaveWebSettingsError);
             }

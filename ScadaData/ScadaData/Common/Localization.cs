@@ -430,16 +430,16 @@ namespace Scada
         /// </summary>
         /// <remarks>Если ключ загружаемого словаря совпадает с ключом уже загруженного, то словари сливаются.
         /// Если совпадают ключи фраз, то новое значение фразы записывается поверх старого</remarks>
-        public static bool LoadDictionaries(string directory, string fileNamePrefix, out string errMsg)
+        public static bool LoadDictionaries(string directory, string fileNamePrefix, out string msg)
         {
             string fileName = GetDictionaryFileName(directory, fileNamePrefix);
-            return LoadDictionaries(fileName, out errMsg);
+            return LoadDictionaries(fileName, out msg);
         }
 
         /// <summary>
         /// Загрузить словари для считанной культуры
         /// </summary>
-        public static bool LoadDictionaries(string fileName, out string errMsg)
+        public static bool LoadDictionaries(string fileName, out string msg)
         {
             if (File.Exists(fileName))
             {
@@ -468,19 +468,19 @@ namespace Scada
                         }
                     }
 
-                    errMsg = "";
+                    msg = (UseRussian ? "Загружен словарь из файла " : "Dictionary is loaded from file ") + fileName;
                     return true;
                 }
                 catch (Exception ex)
                 {
-                    errMsg = (UseRussian ? "Ошибка при загрузке словарей: " : 
-                        "Error loading dictionaries: ") + ex.Message;
+                    msg = string.Format(UseRussian ? "Ошибка при загрузке словарей из файла {0}: {1}" : 
+                        "Error loading dictionaries from file {0}: {1}", fileName, ex.Message);
                     return false;
                 }
             }
             else
             {
-                errMsg = (UseRussian ? "Не найден файл словарей " : "File with dictionaries not found ") + fileName;
+                msg = (UseRussian ? "Не найден файл словарей " : "File with dictionaries not found ") + fileName;
                 return false;
             }
         }
@@ -489,7 +489,7 @@ namespace Scada
         /// Обновить словарь, если он изменился
         /// </summary>
         public static bool RefreshDictionary(string directory, string fileNamePrefix, ref DateTime fileAge, 
-            out bool updated, out string errMsg)
+            out bool updated, out string msg)
         {
             string fileName = Localization.GetDictionaryFileName(directory, fileNamePrefix);
             DateTime newFileAge = ScadaUtils.GetLastWriteTime(fileName);
@@ -497,10 +497,10 @@ namespace Scada
             if (fileAge == newFileAge)
             {
                 updated = false;
-                errMsg = "";
+                msg = "";
                 return true;
             }
-            else if (Localization.LoadDictionaries(fileName, out errMsg))
+            else if (Localization.LoadDictionaries(fileName, out msg))
             {
                 fileAge = newFileAge;
                 updated = true;
