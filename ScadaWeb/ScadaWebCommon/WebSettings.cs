@@ -54,7 +54,7 @@ namespace Scada.Web
 
 
         /// <summary>
-        /// Получить имя файла по умолчанию
+        /// Получить имя файла настроек по умолчанию
         /// </summary>
         public override string DefaultFileName
         {
