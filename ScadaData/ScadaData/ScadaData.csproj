@@ -55,6 +55,7 @@
     <Compile Include="Client\CommSettings.cs" />
     <Compile Include="Client\CtrlCnlProps.cs" />
     <Compile Include="Client\ServerComm.cs" />
+    <Compile Include="Common\FileListener.cs" />
     <Compile Include="Data\Arithmetic.cs" />
     <Compile Include="Data\BaseAdapter.cs" />
     <Compile Include="Data\BaseValues.cs" />
@@ -76,6 +77,9 @@
     <Content Include="Lang\ScadaData.en-GB.xml">
       <SubType>Designer</SubType>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Common\ScadaUtils.UI.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

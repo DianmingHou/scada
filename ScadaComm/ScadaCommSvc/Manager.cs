@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2014 Mikhail Shiryaev
+ * Copyright 2015 Mikhail Shiryaev
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,15 @@
  * 
  * Author   : Mikhail Shiryaev
  * Created  : 2006
- * Modified : 2014
+ * Modified : 2015
  */
 
+using Scada.Client;
+using Scada.Comm.KP;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Ports;
@@ -33,8 +36,6 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Xml;
-using Scada.Client;
-using Scada.Comm.KP;
 using Utils;
 
 namespace Scada.Comm.Svc
@@ -156,6 +157,8 @@ namespace Scada.Comm.Svc
         /// </summary>
         public Manager()
         {
+            AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
+
             commonParams.SetToDefault();
             commLines = new List<CommLine>();
             kpTypes = new SortedList<string, Type>();
@@ -218,6 +221,17 @@ namespace Scada.Comm.Svc
         /// </summary>
         public Log Log { get; private set; }
 
+
+        /// <summary>
+        /// Вывести информацию о необработанном исключении в журнал
+        /// </summary>
+        private void OnUnhandledException(object sender, UnhandledExceptionEventArgs args)
+        {
+            Exception ex = args.ExceptionObject as Exception;
+            Log.WriteAction(string.Format(Localization.UseRussian ? "Необработанное исключение{0}" :
+                "Unhandled exception{0}", ex == null ? "" : ": " + ex.ToString()), Log.ActTypes.Exception);
+            Log.WriteBreak();
+        }
 
         /// <summary>
         /// Распознать общие параметры из файла конфигурации
@@ -434,12 +448,14 @@ namespace Scada.Comm.Svc
                                 string typeFullName = "Scada.Comm.KP." + dllName + "Logic";
                                 Type kpType;
                                 if (kpTypes.ContainsKey(dllName))
+                                {
                                     kpType = kpTypes[dllName];
+                                }
                                 else
                                 {
                                     // загрузка типа из библиотеки
                                     string path = KpDir + dllName + ".dll";
-                                    Log.WriteAction((Localization.UseRussian ? "Загрузка библиотеки КП: " : 
+                                    Log.WriteAction((Localization.UseRussian ? "Загрузка библиотеки КП: " :
                                         "Load device library: ") + path, Log.ActTypes.Action);
 
                                     Assembly asm = Assembly.LoadFile(path);
@@ -462,7 +478,18 @@ namespace Scada.Comm.Svc
                                 reqParams.CmdLine = kpElem.GetAttribute("cmdLine");
 
                                 // создание экземпляра класса КП
-                                KPLogic kpLogic = Activator.CreateInstance(kpType, int.Parse(kpNumber)) as KPLogic;
+                                KPLogic kpLogic;
+                                try
+                                {
+                                    kpLogic = (KPLogic)Activator.CreateInstance(kpType, int.Parse(kpNumber));
+                                }
+                                catch (Exception ex)
+                                {
+                                    kpLogic = null;
+                                    throw new Exception((Localization.UseRussian ? 
+                                        "Ошибка при создании экземпляра класса КП: " : 
+                                        "Error creating device class instance: ") + ex.Message);
+                                }
                                 kpLogic.Bind = kpBind;
                                 kpLogic.Name = kpElem.GetAttribute("name");
                                 string address = kpElem.GetAttribute("address");
@@ -768,13 +795,13 @@ namespace Scada.Comm.Svc
         /// <summary>
         /// Инициализировать директории приложения
         /// </summary>
-        public void InitAppDirs(out bool dirsExist, out bool logDirExists)
+        private void InitAppDirs(out bool dirsExist, out bool logDirExists)
         {
-            ConfigDir = ExeDir + "Config\\";
-            LangDir = ExeDir + "Lang\\";
-            LogDir = ExeDir + "Log\\";
-            KpDir = ExeDir + "KP\\";
-            CmdDir = ExeDir + "Cmd\\";
+            ConfigDir = ExeDir + "Config" + Path.DirectorySeparatorChar;
+            LangDir = ExeDir + "Lang" + Path.DirectorySeparatorChar;
+            LogDir = ExeDir + "Log" + Path.DirectorySeparatorChar;
+            KpDir = ExeDir + "KP" + Path.DirectorySeparatorChar;
+            CmdDir = ExeDir + "Cmd" + Path.DirectorySeparatorChar;
 
             Log.FileName = LogDir + LogFileName;
             infoFileName = LogDir + InfoFileName;
@@ -795,7 +822,7 @@ namespace Scada.Comm.Svc
         /// <summary>
         /// Распознать файл конфигурации, создать объекты линий связи и КП
         /// </summary>
-        public bool ParseConfig()
+        private bool ParseConfig()
         {
             try
             {
@@ -823,11 +850,10 @@ namespace Scada.Comm.Svc
             return true;
         }
 
-
         /// <summary>
         /// Запустить потоки линий связи и поток обмена данными со SCADA-Сервером
         /// </summary>
-        public void StartThreads()
+        private void StartThreads()
         {
             startTimer = new Timer(StartTimerCallback, null, 0, Timeout.Infinite);
         }
@@ -835,7 +861,7 @@ namespace Scada.Comm.Svc
         /// <summary>
         /// Остановить потоки линий связи и поток обмена данными со SCADA-Сервером
         /// </summary>
-        public void StopThreads()
+        private void StopThreads()
         {
             try
             {
@@ -1125,6 +1151,87 @@ namespace Scada.Comm.Svc
                         "Error passing command to the manager: ") + ex.Message, Log.ActTypes.Exception);
                 }
             }
+        }
+
+
+        /// <summary>
+        /// Запустить службу
+        /// </summary>
+        public void StartService()
+        {
+            // инициализация необходимых директорий
+            bool dirsExist;    // необходимые директории существуют
+            bool logDirExists; // директория log-файлов существует
+            InitAppDirs(out dirsExist, out logDirExists);
+
+            if (logDirExists)
+            {
+                Log.WriteBreak();
+                Log.WriteAction(Localization.UseRussian ? "Служба ScadaCommService запущена" :
+                    "ScadaCommService is started", Log.ActTypes.Action);
+            }
+
+            if (dirsExist)
+            {
+                // локализация ScadaData.dll
+                if (!Localization.UseRussian)
+                {
+                    string errMsg;
+                    if (Localization.LoadDictionaries(Manager.LangDir, "ScadaData", out errMsg))
+                        CommonPhrases.Init();
+                    else
+                        Log.WriteAction(errMsg, Log.ActTypes.Error);
+                }
+
+                // считывание конфигурации и запуск потоков
+                if (ParseConfig())
+                    StartThreads();
+                else
+                    Log.WriteAction(Localization.UseRussian ? "Нормальная работа программы невозможна." :
+                        "Normal program execution is impossible.", Log.ActTypes.Error);
+            }
+            else
+            {
+                string errMsg = string.Format(Localization.UseRussian ?
+                    "Не существуют необходимые директории:{0}{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}" +
+                    "Нормальная работа программы невозможна." :
+                    "Required directories are not exist:{0}{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}" +
+                    "Normal program execution is impossible.",
+                    Environment.NewLine, Manager.ConfigDir, Manager.LangDir, Manager.LogDir, Manager.KpDir, Manager.CmdDir);
+
+                try
+                {
+                    if (EventLog.SourceExists("ScadaCommService"))
+                        EventLog.WriteEvent("ScadaCommService",
+                            new EventInstance(0, 0, EventLogEntryType.Error), errMsg);
+                }
+                catch { }
+
+                if (logDirExists)
+                    Log.WriteAction(errMsg, Log.ActTypes.Error);
+            }
+        }
+
+        /// <summary>
+        /// Остановить службу
+        /// </summary>
+        public void StopService()
+        {
+            StopThreads();
+            Log.WriteAction(Localization.UseRussian ? "Служба ScadaCommService остановлена" :
+                "ScadaCommService is stopped", Log.ActTypes.Action);
+            Log.WriteBreak();
+        }
+
+        /// <summary>
+        /// Отключить службу немедленно при выключении компьютера
+        /// </summary>
+        public void ShutdownService()
+        {
+            StopThreads();
+            Log.WriteAction(Localization.UseRussian ? "Служба ScadaCommService отключена" :
+                "ScadaCommService is shutdown", Log.ActTypes.Action);
+            Log.WriteBreak();
         }
     }
 }
