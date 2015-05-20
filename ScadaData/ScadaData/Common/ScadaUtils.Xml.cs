@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2014 Mikhail Shiryaev
+ * Copyright 2015 Mikhail Shiryaev
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
  * 
  * Author   : Mikhail Shiryaev
  * Created  : 2014
- * Modified : 2014
+ * Modified : 2015
  */
 
 using System;
@@ -136,17 +136,25 @@ namespace Scada
         }
 
         /// <summary>
-        /// Получить строковое значение дочернего XML-узла
+        /// Получить дочерний XML-узел обязательно
         /// </summary>
         /// <remarks>Если XML-узел не существует, вызывается исключение InvalidOperationException</remarks>
-        public static string GetChildAsString(this XmlNode parentXmlNode, string childNodeName)
+        public static XmlNode SelectSingleNodeForSure(this XmlNode parentXmlNode, string childNodeName)
         {
             XmlNode node = parentXmlNode.SelectSingleNode(childNodeName);
             if (node == null)
                 throw new InvalidOperationException(
                     string.Format(CommonPhrases.XmlNodeNotFound, childNodeName, parentXmlNode.Name));
-            else
-                return node.InnerText;
+            return node;
+        }
+
+        /// <summary>
+        /// Получить строковое значение дочернего XML-узла
+        /// </summary>
+        public static string GetChildAsString(this XmlNode parentXmlNode, string childNodeName)
+        {
+            XmlNode node = parentXmlNode.SelectSingleNodeForSure(childNodeName);
+            return node.InnerText;
         }
 
         /// <summary>
