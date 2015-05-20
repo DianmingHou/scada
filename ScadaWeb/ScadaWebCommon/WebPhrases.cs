@@ -133,6 +133,9 @@ namespace Scada.Web
         public static string ReportsMenuItemText { get; private set; }
         public static string ConfigMenuItemText { get; private set; }
         public static string AboutMenuItemText { get; private set; }
+        public static string PlgSettingsLoaded { get; private set; }
+        public static string LoadPlgSettingsError { get; private set; }
+        public static string SavePlgSettingsError { get; private set; }
 
         private static void SetToDefault()
         {
@@ -216,6 +219,9 @@ namespace Scada.Web
             ReportsMenuItemText = "Отчёты";
             ConfigMenuItemText = "Конфигурация";
             AboutMenuItemText = "О программе";
+            PlgSettingsLoaded = "Загружены настройки плагина \"{0}\"";
+            LoadPlgSettingsError = "Ошибка при загрузке настроек плагина \"{0}\": {1}";
+            SavePlgSettingsError = "Ошибка при сохранении настроек плагина \"{0}\": {1}";
         }
 
         public static void Init()
@@ -345,6 +351,9 @@ namespace Scada.Web
                 CurColumn = dict.GetPhrase("ReportsMenuItemText", ReportsMenuItemText);
                 InCnlNumHint = dict.GetPhrase("ConfigMenuItemText", ConfigMenuItemText);
                 OutCnlNumHint = dict.GetPhrase("AboutMenuItemText", AboutMenuItemText);
+                PlgSettingsLoaded = dict.GetPhrase("PlgSettingsLoaded", PlgSettingsLoaded);
+                LoadPlgSettingsError = dict.GetPhrase("LoadPlgSettingsError", LoadPlgSettingsError);
+                SavePlgSettingsError = dict.GetPhrase("SavePlgSettingsError", SavePlgSettingsError);
             }
         }
     }
