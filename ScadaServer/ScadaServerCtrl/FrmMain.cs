@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2014 Mikhail Shiryaev
+ * Copyright 2015 Mikhail Shiryaev
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
  * 
  * Author   : Mikhail Shiryaev
  * Created  : 2013
- * Modified : 2014
+ * Modified : 2015
  */
 
 using System;
@@ -35,7 +35,7 @@ using System.Threading;
 using System.Windows.Forms;
 using Scada.Client;
 using Scada.Data;
-using Scada.Server.Module;
+using Scada.Server.Modules;
 using Utils;
 
 namespace Scada.Server.Ctrl
@@ -78,10 +78,6 @@ namespace Scada.Server.Ctrl
         /// Имя файла ошибок
         /// </summary>
         private const string ErrFileName = "ScadaServerCtrl.err";
-        /// <summary>
-        /// Пароль для генератора
-        /// </summary>
-        private const string GenPwd = "12345";
         /// <summary>
         /// Интервал ожидания перезапуска службы
         /// </summary>
@@ -598,7 +594,7 @@ namespace Scada.Server.Ctrl
                 try
                 {
                     Assembly asm = Assembly.LoadFile(modDir + fileName);
-                    Type type = asm.GetType("Scada.Server.Module." +
+                    Type type = asm.GetType("Scada.Server.Modules." +
                         Path.GetFileNameWithoutExtension(fileName) + "View", true);
                     modView = Activator.CreateInstance(type) as ModView;
                     modView.ConfigDir = configDir;
@@ -645,6 +641,7 @@ namespace Scada.Server.Ctrl
 
                 if (Localization.LoadDictionaries(langDir, "ScadaServer", out errMsg))
                 {
+                    ModPhrases.InitFromDictionaries();
                     Localization.TranslateForm(this, "Scada.Server.Ctrl.FrmMain", toolTip, cmsNotify);
                     AppPhrases.Init();
                     TranslateTree();
@@ -820,12 +817,7 @@ namespace Scada.Server.Ctrl
         private void btnAbout_Click(object sender, EventArgs e)
         {
             // отображение формы о программе
-            string errMsg;
-            if (!FrmAbout.ShowAbout(exeDir, out errMsg))
-            {
-                errLog.WriteAction(errMsg);
-                ScadaUtils.ShowError(errMsg);
-            }
+            FrmAbout.ShowAbout(exeDir, errLog);
         }
 
 
@@ -1195,7 +1187,7 @@ namespace Scada.Server.Ctrl
             txtGenPwd1.TextChanged += txtGenPwd_TextChanged;
             txtGenPwd2.TextChanged += txtGenPwd_TextChanged;
             txtGenPwd3.TextChanged += txtGenPwd_TextChanged;
-            gbGenSrez.Visible = gbGenEv.Visible = gbCheckEv.Visible = gbGenCmd.Visible = pwd == GenPwd;
+            gbGenSrez.Visible = gbGenEv.Visible = gbCheckEv.Visible = gbGenCmd.Visible = pwd == commSettings.ServerPwd;
         }
 
         private void rbArcSrez_CheckedChanged(object sender, EventArgs e)
@@ -1252,7 +1244,7 @@ namespace Scada.Server.Ctrl
                 cbSrezCnlNum.Items.Remove(cnlNumStr);
                 cbSrezCnlNum.Items.Insert(0, cnlNumStr);
                 cbSrezCnlNum.Text = cnlNumStr;
-                ScadaUtils.ShowInfo(AppPhrases.SendDataCompleted);
+                ScadaUtils.ShowInfo(CommonPhrases.DataSentSuccessfully);
             }
             else
             {
@@ -1301,7 +1293,7 @@ namespace Scada.Server.Ctrl
             
             bool result;
             if (ServerComm.SendEvent(ev, out result))
-                ScadaUtils.ShowInfo(AppPhrases.SendEventCompleted);
+                ScadaUtils.ShowInfo(CommonPhrases.EventSentSuccessfully);
             else
                 ScadaUtils.ShowError(ServerComm.ErrMsg);
         }
@@ -1315,7 +1307,7 @@ namespace Scada.Server.Ctrl
             int userID = decimal.ToInt32(numEvUserID2.Value);
 
             if (ServerComm.CheckEvent(userID, evDate, evNum, out result))
-                ScadaUtils.ShowInfo(AppPhrases.CheckEventCompleted);
+                ScadaUtils.ShowInfo(CommonPhrases.EventCheckSentSuccessfully);
             else
                 ScadaUtils.ShowError(ServerComm.ErrMsg);
         }
@@ -1386,7 +1378,7 @@ namespace Scada.Server.Ctrl
             }
 
             if (sendOk)
-                ScadaUtils.ShowInfo(AppPhrases.SendCmdCompleted);
+                ScadaUtils.ShowInfo(CommonPhrases.CmdSentSuccessfully);
             else
                 ScadaUtils.ShowError(ServerComm.ErrMsg);
         }

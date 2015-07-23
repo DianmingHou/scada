@@ -26,6 +26,7 @@
 using System;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
@@ -72,6 +73,15 @@ namespace Scada
             if (dir.Length > 0 && !dir.EndsWith(Path.DirectorySeparatorChar.ToString())) 
                 dir += Path.DirectorySeparatorChar;
             return dir;
+        }
+
+        /// <summary>
+        /// Скорректировать разделитель директории
+        /// </summary>
+        public static string CorrectDirectorySeparator(string path)
+        {
+            // Path.AltDirectorySeparatorChar == '/' для Mono на Linux, что некорректно 
+            return path.Replace('\\', Path.DirectorySeparatorChar).Replace('/', Path.DirectorySeparatorChar);
         }
 
         /// <summary>
@@ -172,6 +182,22 @@ namespace Scada
                 return false;
             }
         }
+
+        /// <summary>
+        /// Преобразовать дату и время в вещественное число побайтно
+        /// </summary>
+        public static double DateTimeToDouble(DateTime dateTime)
+        {
+            return BitConverter.ToDouble(BitConverter.GetBytes(dateTime.ToBinary()), 0);
+        }
+
+        /// <summary>
+        /// Преобразовать вещественное число в дату и время побайтно
+        /// </summary>
+        public static DateTime DoubleToDateTime(double value)
+        {
+            return DateTime.FromBinary(BitConverter.ToInt64(BitConverter.GetBytes(value), 0));
+        }
         
         /// <summary>
         /// Вычислить хеш-функцию MD5
@@ -196,6 +222,21 @@ namespace Scada
 
                 ms.Position = 0;
                 return bf.Deserialize(ms);
+            }
+        }
+
+        /// <summary>
+        /// Скорректировать имя типа для работы DeepClone
+        /// </summary>
+        public static void CorrectTypeName(ref string typeName)
+        {
+            if (typeName.Contains("System.Collections.Generic.List"))
+            {
+                // удаление информации о сборке
+                int ind1 = typeName.IndexOf(",");
+                int ind2 = typeName.IndexOf("]");
+                if (ind1 < ind2)
+                    typeName = typeName.Remove(ind1, ind2 - ind1);
             }
         }
 

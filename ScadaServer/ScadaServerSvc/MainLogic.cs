@@ -32,7 +32,7 @@ using System.Text;
 using System.Threading;
 using Microsoft.Win32;
 using Scada.Data;
-using Scada.Server.Module;
+using Scada.Server.Modules;
 using Utils;
 
 namespace Scada.Server.Svc
@@ -88,7 +88,11 @@ namespace Scada.Server.Svc
         /// <summary>
         /// Младший байт номера версии приложения
         /// </summary>
-        public const byte AppVersionLo = 4;
+        public const byte AppVersionLo = 5;
+        /// <summary>
+        /// Строковая запись версии приложения
+        /// </summary>
+        public const string AppVersion = "4.5.0.0";
         /// <summary>
         /// Имя файла журнала приложения
         /// </summary>
@@ -150,12 +154,12 @@ namespace Scada.Server.Svc
         /// Формат описания события на команду ТУ
         /// </summary>
         private static readonly string EventOnCmdFormat = Localization.UseRussian ?
-            "Команда ТУ: канал упр. = {0}, значение = {1}, ид. польз. = {2}" :
-            "Command: out channel = {0}, value = {1}, user ID = {2}";
+            "Команда ТУ: канал упр. = {0}, ид. польз. = {1}, значение = {2}, данные = {3}" :
+            "Command: out channel = {0}, user ID = {1}, value = {2}, data = {3}";
 
         private string infoFileName;               // полное имя файла информации
         private Thread thread;                     // поток работы сервера
-        private volatile bool terminated;          // работа потока прервана
+        private volatile bool terminated;          // необходимо завершить работу потока
         private volatile bool serverIsReady;       // сервер готов к работе
         private DateTime startDT;                  // дата и время запуска работы
         private string workState;                  // состояние работы
@@ -172,7 +176,7 @@ namespace Scada.Server.Svc
         private SortedList<int, CtrlCnl> ctrlCnls; // активные каналы управления
         private SortedList<string, User> users;    // пользователи
         private List<string> formulas;             // формулы
-        private SrezTable.Srez curSrez;            // текущий срез, предназначенный для формироваться данных сервера
+        private SrezTable.Srez curSrez;            // текущий срез, предназначенный для формирования данных сервера
         private bool curSrezMod;                   // признак изменения текущего среза (для записи по изменению)
         private SrezTableLight.Srez procSrez;      // срез, обрабатываемый в настоящий момент
         private SrezTable.SrezDescr srezDescr;     // описание создаваемых срезов
@@ -305,7 +309,7 @@ namespace Scada.Server.Svc
 
                         // создание экземпляра класса модуля
                         Assembly asm = Assembly.LoadFile(fullFileName);
-                        Type type = asm.GetType("Scada.Server.Module." + 
+                        Type type = asm.GetType("Scada.Server.Modules." + 
                             Path.GetFileNameWithoutExtension(fileName) + "Logic", true);
                         ModLogic modLogic = Activator.CreateInstance(type) as ModLogic;
                         modLogic.ConfigDir = ConfigDir;
@@ -600,7 +604,7 @@ namespace Scada.Server.Svc
                         user.Name = (string)dataRow["Name"];
                         user.Password = (string)dataRow["Password"];
                         user.RoleID = (int)dataRow["RoleID"];
-                        users[user.Name.Trim().ToLower()] = user;
+                        users[user.Name.Trim().ToLowerInvariant()] = user;
                     }
                 }
 
@@ -673,8 +677,13 @@ namespace Scada.Server.Svc
 
             foreach (CtrlCnl ctrlCnl in ctrlCnls.Values)
             {
-                if (ctrlCnl.FormulaUsed && ctrlCnl.CmdTypeID == 0 /*стандартная команда*/)
-                    calculator.AddCtrlCnlFormulaSource(ctrlCnl.CtrlCnlNum, ctrlCnl.Formula);
+                if (ctrlCnl.FormulaUsed)
+                {
+                    if (ctrlCnl.CmdTypeID == BaseValues.CmdTypes.Standard)
+                        calculator.AddCtrlCnlStandardFormulaSource(ctrlCnl.CtrlCnlNum, ctrlCnl.Formula);
+                    else if (ctrlCnl.CmdTypeID == BaseValues.CmdTypes.Binary)
+                        calculator.AddCtrlCnlBinaryFormulaSource(ctrlCnl.CtrlCnlNum, ctrlCnl.Formula);
+                }
             }
 
             // компиляция формул и получение методов вычисления каналов
@@ -696,15 +705,23 @@ namespace Scada.Server.Svc
 
                 foreach (CtrlCnl ctrlCnl in ctrlCnls.Values)
                 {
-                    if (ctrlCnl.FormulaUsed && ctrlCnl.CmdTypeID == 0 /*стандартная команда*/)
+                    ctrlCnl.CalcCmdVal = null;
+                    ctrlCnl.CalcCmdData = null;
+
+                    if (ctrlCnl.FormulaUsed)
                     {
-                        ctrlCnl.CalcCmdVal = calculator.GetCalcCmdVal(ctrlCnl.CtrlCnlNum);
-                        if (ctrlCnl.CalcCmdVal == null)
-                            return false;
-                    }
-                    else
-                    {
-                        ctrlCnl.CalcCmdVal = null;
+                        if (ctrlCnl.CmdTypeID == BaseValues.CmdTypes.Standard)
+                        {
+                            ctrlCnl.CalcCmdVal = calculator.GetCalcCmdVal(ctrlCnl.CtrlCnlNum);
+                            if (ctrlCnl.CalcCmdVal == null)
+                                return false;
+                        }
+                        else if (ctrlCnl.CmdTypeID == BaseValues.CmdTypes.Binary)
+                        {
+                            ctrlCnl.CalcCmdData = calculator.GetCalcCmdData(ctrlCnl.CtrlCnlNum);
+                            if (ctrlCnl.CalcCmdData == null)
+                                return false;
+                        }
                     }
                 }
 
@@ -717,7 +734,7 @@ namespace Scada.Server.Svc
         }
 
         /// <summary>
-        /// Цикл работы менеждера (метод вызывается в отдельном потоке)
+        /// Цикл работы сервера (метод вызывается в отдельном потоке)
         /// </summary>
         private void Execute()
         {
@@ -735,8 +752,8 @@ namespace Scada.Server.Svc
                 curSrezCopyAdapter = new SrezAdapter();
                 eventAdapter = new EventAdapter();
                 eventCopyAdapter = new EventAdapter();
-                curSrezAdapter.FileName = Settings.ArcDir + "Cur" + Path.DirectorySeparatorChar + "current.dat";
-                curSrezCopyAdapter.FileName = Settings.ArcCopyDir + "Cur" + Path.DirectorySeparatorChar + "current.dat";
+                curSrezAdapter.FileName = ServerUtils.BuildCurFileName(Settings.ArcDir);
+                curSrezCopyAdapter.FileName = ServerUtils.BuildCurFileName(Settings.ArcCopyDir);
                 eventAdapter.Directory = Settings.ArcDir + "Events" + Path.DirectorySeparatorChar;
                 eventCopyAdapter.Directory = Settings.ArcCopyDir + "Events" + Path.DirectorySeparatorChar;
 
@@ -982,11 +999,9 @@ namespace Scada.Server.Svc
                     // создание кэша таблицы срезов
                     srezTableCache = new SrezTableCache(date);
                     srezTableCacheList.Add(date, srezTableCache);
-                    string path;
 
                     if (srezType == SrezTypes.Min)
                     {
-                        path = "Min" + Path.DirectorySeparatorChar + "m" + date.ToString("yyMMdd") + ".dat";
                         if (Localization.UseRussian)
                         {
                             srezTableCache.SrezTable.Descr = "минутных срезов";
@@ -997,10 +1012,14 @@ namespace Scada.Server.Svc
                             srezTableCache.SrezTable.Descr = "minute data";
                             srezTableCache.SrezTableCopy.Descr = "minute data copy";
                         }
+
+                        srezTableCache.SrezAdapter.FileName =
+                            ServerUtils.BuildMinFileName(Settings.ArcDir, date);
+                        srezTableCache.SrezCopyAdapter.FileName =
+                            ServerUtils.BuildMinFileName(Settings.ArcCopyDir, date);
                     }
                     else
                     {
-                        path = "Hour" + Path.DirectorySeparatorChar + "h" + date.ToString("yyMMdd") + ".dat";
                         if (Localization.UseRussian)
                         {
                             srezTableCache.SrezTable.Descr = "часовых срезов";
@@ -1013,10 +1032,12 @@ namespace Scada.Server.Svc
                                 srezTableCache.SrezTableCopy.Descr = "hourly data copy";
                             }
                         }
-                    }
 
-                    srezTableCache.SrezAdapter.FileName = Settings.ArcDir + path;
-                    srezTableCache.SrezCopyAdapter.FileName = Settings.ArcCopyDir + path;
+                        srezTableCache.SrezAdapter.FileName =
+                            ServerUtils.BuildHourFileName(Settings.ArcDir, date);
+                        srezTableCache.SrezCopyAdapter.FileName =
+                            ServerUtils.BuildHourFileName(Settings.ArcCopyDir, date);
+                    }
                 }
             }
 
@@ -1285,7 +1306,7 @@ namespace Scada.Server.Svc
                     addSrez = false;
                 }
 
-                if (arcSrez != null)
+                if (arcSrez == null)
                     arcSrez = srez;
 
                 // изменение архивного среза
@@ -1630,8 +1651,7 @@ namespace Scada.Server.Svc
                     writer.WriteLine(AppInfoFormat,
                         startDT.ToLocalizedString(),
                         workSpan.Days > 0 ? workSpan.ToString(@"d\.hh\:mm\:ss") : workSpan.ToString(@"hh\:mm\:ss"),
-                        workState,
-                        AppVersionHi + "." + AppVersionLo);
+                        workState, AppVersion);
                     writer.WriteLine();
                     writer.Write(comm.GetClientsInfo());
                 }
@@ -1917,7 +1937,7 @@ namespace Scada.Server.Svc
             catch (Exception ex)
             {
                 AppLog.WriteAction((Localization.UseRussian ? 
-                    "Ошибка при запуске работы сервера: " : "Error start server: ") +
+                    "Ошибка при запуске работы сервера: " : "Error starting server: ") +
                     ex.Message, Log.ActTypes.Exception);
                 return false;
             }
@@ -1993,7 +2013,7 @@ namespace Scada.Server.Svc
             lock (users)
             {
                 User user;
-                return users.TryGetValue(userName.Trim().ToLower(), out user) ? user.Clone() : null;
+                return users.TryGetValue(userName.Trim().ToLowerInvariant(), out user) ? user.Clone() : null;
             }
         }
 
@@ -2270,7 +2290,7 @@ namespace Scada.Server.Svc
             if (serverIsReady)
             {
                 // запись квитирования события
-                string tableName = "e" + date.ToString("yyMMdd") + ".dat";
+                string tableName = EventAdapter.BuildEvTableName(date);
                 bool writeOk1 = Settings.WriteEv ? 
                     WriteEventCheck(tableName, eventAdapter, evNum, userID) : true;
                 bool writeOk2 = Settings.WriteEvCopy ? 
@@ -2292,36 +2312,71 @@ namespace Scada.Server.Svc
         /// </summary>
         public void ProcCommand(CtrlCnl ctrlCnl, ModLogic.Command cmd, int userID, out bool passToClients)
         {
-            if (!serverIsReady || ctrlCnl == null)
-            {
-                passToClients = false;
-            }
-            else
+            passToClients = false;
+
+            if (serverIsReady && ctrlCnl != null)
             {
                 int ctrlCnlNum = ctrlCnl.CtrlCnlNum;
 
-                // вычисление значения команды
+                // вычисление значения или данных команды по формуле канала управления
                 if (ctrlCnl.CalcCmdVal != null)
                 {
+                    // вычисление значения стандартной команды
                     try
                     {
+                        procSrez = curSrez; // необходимо для работы формул Val(n) и Stat(n)
                         double cmdVal = cmd.CmdVal;
-                        lock (calculator)
-                            ctrlCnl.CalcCmdVal(ref cmdVal);
+                        lock (curSrez) 
+                            lock (calculator)
+                                ctrlCnl.CalcCmdVal(ref cmdVal);
                         cmd.CmdVal = cmdVal;
+                        passToClients = !double.IsNaN(cmdVal);
                     }
                     catch (Exception ex)
                     {
                         AppLog.WriteAction(string.Format(Localization.UseRussian ? 
-                            "Ошибка при вычислении значения команды для канала управления {0}: {1}" : 
-                            "Error calculating command value for the output channel {0}: {1}", 
+                            "Ошибка при вычислении значения стандартной команды для канала управления {0}: {1}" : 
+                            "Error calculating standard command value for the output channel {0}: {1}", 
                             ctrlCnlNum, ex.Message), Log.ActTypes.Error);
                         cmd.CmdVal = double.NaN;
                     }
+                    finally
+                    {
+                        procSrez = null;
+                    }
+                }
+                else if (ctrlCnl.CalcCmdData != null)
+                {
+                    // вычисление данных бинарной команды
+                    try
+                    {
+                        procSrez = curSrez;
+                        byte[] cmdData = cmd.CmdData;
+                        lock (curSrez)
+                            lock (calculator)
+                                ctrlCnl.CalcCmdData(ref cmdData);
+                        cmd.CmdData = cmdData;
+                        passToClients = cmdData != null;
+                    }
+                    catch (Exception ex)
+                    {
+                        AppLog.WriteAction(string.Format(Localization.UseRussian ?
+                            "Ошибка при вычислении данных бинарной команды для канала управления {0}: {1}" :
+                            "Error calculating binary command data for the output channel {0}: {1}",
+                            ctrlCnlNum, ex.Message), Log.ActTypes.Error);
+                        cmd.CmdVal = double.NaN;
+                    }
+                    finally
+                    {
+                        procSrez = null;
+                    }
+                }
+                else
+                {
+                    passToClients = true;
                 }
 
                 // выполнение действий модулей после приёма команды
-                passToClients = !double.IsNaN(cmd.CmdVal);
                 RaiseOnCommandReceived(ctrlCnlNum, cmd, userID, ref passToClients);
 
                 // создание события
@@ -2331,7 +2386,15 @@ namespace Scada.Server.Svc
                     ev.DateTime = DateTime.Now;
                     ev.ObjNum = ctrlCnl.ObjNum;
                     ev.KPNum = ctrlCnl.KPNum;
-                    ev.Descr = string.Format(EventOnCmdFormat, ctrlCnlNum, cmd.CmdVal, userID);
+                    
+                    string cmdDataStr;
+                    if (cmd.CmdData == null)
+                        cmdDataStr = "null";
+                    else if (cmd.CmdData.Length == 0)
+                        cmdDataStr = "empty";
+                    else cmdDataStr = ScadaUtils.BytesToHex(cmd.CmdData);
+
+                    ev.Descr = string.Format(EventOnCmdFormat, ctrlCnlNum, userID, cmd.CmdVal, cmdDataStr);
 
                     // запись события и выполнение действий модулей
                     WriteEvent(ev);
